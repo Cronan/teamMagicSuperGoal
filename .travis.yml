@@ -8,4 +8,6 @@ before_install:
   - cd src
 install:
   - pip install .
+script:
+    - pytest
 
