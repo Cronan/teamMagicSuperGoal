@@ -6,7 +6,6 @@ python:
   - "3.6"
 before_install:
   - cd src
-  - export FLASK_APP="teammagicsupergoal"
 install:
   - pip install .
 
