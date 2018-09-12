@@ -1,7 +1,8 @@
-# teamMagicSuperGoal
+# Team Magic Super Goal
 
-Launch using the following:
+Navigate to the src folder after cloning.
+
 ```
-easy_install flask
-FLASK_APP=src/flask_app.py flask run --host=0.0.0.0 --port=8750
+python setup.py develop
+FLASK_APP=teammagicsupergoal flask run --host=0.0.0.0 --port=8750
 ```
