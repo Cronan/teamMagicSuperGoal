@@ -77,30 +77,85 @@ class Timeseries:
         elif returns_type == TimeseriesSubType.LOG:
             return np.log(self.__np_values[-1] / self.__np_values[-period-1])
 
-    def calculate_moving_average(self, weigthing_type = TimeseriesSubType.EQUAL, period = 15):
+    def calculate_moving_average(self, weighting_type = TimeseriesSubType.EQUAL, period = 15):
         '''
         Calculate moving average for current time-series
 
-        weigthing_type : Exponential/Equal
+        weighting_type : Exponential/Equal
         period : period for moving average calculation
         '''
         moving_average = None
         
-        if weigthing_type == TimeseriesSubType.EQUAL:
+        if weighting_type == TimeseriesSubType.EQUAL:
             np_sum = self.__np_values[period - 1:]
             for ii in range(1, period):
                 np_sum = np_sum + self.__np_values[period - ii - 1: -ii]
             moving_average = (np_sum / period).tolist()
-        elif weigthing_type == TimeseriesSubType.EXPONENTIAL:
+        elif weighting_type == TimeseriesSubType.EXPONENTIAL:
+            moving_average = []
+            alpha = 2.0 / (period + 1.0)
+            moving_average.append(sum(self.__np_values[0:period]) / period)
+            for val in self.values[period:]:
+                new_av = val * alpha + moving_average[-1] * (1.0 - alpha)
+                moving_average.append(new_av)
+        
+        new_ts = Timeseries(self.dates[period-1:], moving_average,
+                            TimeseriesType.MOVING_AVERAGE, weighting_type, period)
+        return new_ts
+
+    def calculate_single_moving_average(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, index = None):
+        '''
+        Calculate the latest moving average.  Where exponential weighting is used, calculation is
+        truncated to point with weighting of 1/100th of latest point.
+
+        weighting_type : Exponential/Equal
+        period : period for moving average calculation
+
+        '''
+        if index == None:
+            index = len(self) - 1
+        if index < 0:
+            index = len(self) + index
+        if period > index + 1:
+            period = index + 1
+
+        if weighting_type == TimeseriesSubType.EQUAL:
+            return sum(self.__np_values[index - period + 1:index + 1]) / period
+        elif weighting_type == TimeseriesSubType.EXPONENTIAL:
+            alpha = 2.0 / (period + 1.0)
+            n_end = int(-2.0 / np.log10(1 - alpha) + 1)
+            total = 0
+            total_wgt = 0
+            for val in self.values[max(index - n_end, 0):index + 1]:
+                total = total * (1 - alpha) + val
+                total_wgt = total_wgt * (1 - alpha) + 1
+
+            return total / total_wgt
+        return None
+
+    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, truncate_days = None):
+        if truncate_days == None:
+            return self.calculate_moving_average(weighting_type, period)
+
+        moving_average = None
+
+        start_idx = min(len(self) - truncate_days, 0) if truncate_days != None else 0
+
+        if weighting_type == TimeseriesSubType.EQUAL:
+            np_sum = self.__np_values[start_idx + period - 1:]
+            for ii in range(1, period):
+                np_sum = np_sum + self.__np_values[start_idx + period - 1 - ii: -ii]
+            moving_average = (np_sum / period).tolist()
+        elif weighting_type == TimeseriesSubType.EXPONENTIAL:
             moving_average = []
             alpha = 2.0 / (period + 1.0)
             moving_average.append(sum(self.__np_values[0:period])/period)
             for val in self.values[period:]:
                 new_av = val * alpha + moving_average[-1] * (1.0 - alpha)
                 moving_average.append(new_av)
-        
-        new_ts = Timeseries(self.dates[period-1:], moving_average,
-                            TimeseriesType.MOVING_AVERAGE, weigthing_type, period)
+
+        new_ts = Timeseries(self.dates[start_idx + period - 1:], moving_average,
+                            TimeseriesType.MOVING_AVERAGE, weighting_type, period)
         return new_ts
 
     def calculate_volatility(self, weighting_type, period = 30, moving_average = None):

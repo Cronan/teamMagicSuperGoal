@@ -69,9 +69,39 @@ def test_returns_log(test_ts, vals, dts):
 def test_moving_av_equal(test_ts, vals):
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, 4)
     assert len(av_ts) == len(test_ts) - 3
-    for ii in range(7):
+    for ii in range(len(test_ts) - 4):
         assert np.isclose(av_ts.values[ii],
                           (vals[ii + 0] + vals[ii + 1] + vals[ii + 2] + vals[ii + 3])/4.0)
+
+
+def test_single_moving_av_equal(test_ts, vals):
+    av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, 5)
+    for ii in range(len(test_ts) - 5):
+        assert np.isclose(av_ts.values[ii],
+                          test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EQUAL, 5, ii + 4))
+        assert np.isclose(av_ts.values[-ii - 1],
+                          test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EQUAL, 5, -ii - 1))
+    assert np.isclose(av_ts.values[-1],
+                      test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EQUAL, 5))
+
+
+def test_single_moving_av_exp(test_ts, vals):
+    test_val = (vals[-1]/2.0 + vals[-2]/4.0 + vals[-3]/8.0 + vals[-4]/16.0 + \
+                vals[-5]/32.0 + vals[-6]/64.0 + vals[-7]/128.0 + vals[-8]/256.0) / (1 - 1/256.0)
+    assert np.isclose(test_val,
+                      test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3))
+    assert np.isclose(test_val,
+                      test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3, len(vals)-1))
+    assert np.isclose(test_val,
+                      test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3, -1))
+    
+    test_val = (vals[-3] + vals[-4]/3.0 + vals[-5]/9.0 + vals[-6]/27.0 + \
+                vals[-7]/81.0 + vals[-8]/243.0) / (1 + 1.0/3 + 1.0/9 + 1.0/27 + 1.0/81 + 1.0/243)
+
+    assert np.isclose(test_val,
+                      test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 2, len(vals)-3))
+    assert np.isclose(test_val,
+                      test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 2, -3))
 
 
 def test_moving_av_exp(test_ts, vals):
