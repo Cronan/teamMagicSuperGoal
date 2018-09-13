@@ -5,21 +5,31 @@ import pytest
 
 
 @pytest.fixture
-def dts():
+def test_data():
     dts = [datetime.date(2018, 1, 1)]
     for ii in range(1, 10):
         dts.append(dts[0] + datetime.timedelta(ii))
-    return dts
+    vals = [100.0, 102.0, 99.0, 101.0, 103.0, 101.5, 103.0, 104.0, 103.5, 105]
+    test_dts = ts.Timeseries(dts, vals, ts.TimeseriesType.PRICE, ts.TimeseriesSubType.ABSOLUTE, 1)
+    return {
+        'dts': dts,
+        'vals': vals,
+        'test_ts': test_dts}
 
 
 @pytest.fixture
-def vals():
-    return [100.0, 102.0, 99.0, 101.0, 103.0, 101.5, 103.0, 104.0, 103.5, 105]
+def dts(test_data):
+    return test_data['dts']
 
 
 @pytest.fixture
-def test_ts(dts, vals):
-    return ts.Timeseries(dts, vals, ts.TimeseriesType.PRICE, ts.TimeseriesSubType.ABSOLUTE, 1)
+def vals(test_data):
+    return test_data['vals']
+
+
+@pytest.fixture
+def test_ts(test_data):
+    return test_data['test_ts']
 
 
 def test_len(test_ts):
