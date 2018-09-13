@@ -131,3 +131,36 @@ class Momentum(TechnicalIndicator):
             results[security] = self.calculate_timeseries_df(df_dictionary[security],
                                                              date_col_name, price_col_name)
         return results
+
+    class MACD(TechnicalIndicator):
+        def __init__(self, short_days, long_days, signal_days):
+            TechnicalIndicator.__init__(self, TechnicalIndicator.MACD)
+            assert short_days < long_days
+            self.long_days = long_days
+            self.short_days = short_days
+            self.signal_days = signal_days
+
+        def calculate_current_ts(self, ts):
+            macd = ts.calculate_moving_average(TimeseriesSubType.EXPONENTIAL, self.short_days) - \
+                   ts.calculate_moving_average(TimeseriesSubType.EXPONENTIAL, self.long_days)
+            signal = ts.calculate_moving_average(TimeseriesSubType.EXPONENTIAL, self.signal_days)
+            return (macd, signal)
+
+        def calculate_timeseries_ts(self, ts):
+            raise NotImplementedError
+
+        def calculate_current_df(self, df, date_col_name = DATE_COL_NAME,
+                                 price_col_name = PRICE_COL_NAME):
+            raise NotImplementedError
+
+        def calculate_timeseries_df(self, df, date_col_name = DATE_COL_NAME,
+                                    price_col_name = PRICE_COL_NAME):
+            raise NotImplementedError
+
+        def calculate_current_all(self, df_dictionary, date_col_name = DATE_COL_NAME,
+                                  price_col_name = PRICE_COL_NAME):
+            raise NotImplementedError
+
+        def calculate_timeseries_all(self, df_dictionary, date_col_name = DATE_COL_NAME,
+                                     price_col_name = PRICE_COL_NAME):
+            raise NotImplementedError

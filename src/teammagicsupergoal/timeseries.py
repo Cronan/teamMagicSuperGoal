@@ -230,3 +230,23 @@ class Timeseries:
         '''
         self.ts_type = TimeseriesType.INDICATOR
         self.ts_sub_type = new_subtype
+
+    def create_truncate(self, truncate_length):
+        if truncate_length > len(self):
+            truncate_length = len(self)
+
+        return Timeseries(self.dates[-truncate_length:],
+                          self.values[-truncate_length:],
+                          self.ts_type, self.ts_sub_type, self.period)
+
+    @staticmethod
+    def linearly_combine(ts_a, scale_a, ts_b, scale_b):
+        new_dates = list(set(ts_a.dates).intersection(ts_b.dates))
+        new_dates.sort()
+
+        new_values = []
+        for date in new_dates:
+            new_values.append(ts_a.values[ts_a.dates.index(date)] * scale_a +
+                              ts_b.values[ts_a.dates.index(date)] * scale_b)
+
+        return Timeseries(new_dates, new_values, ts_a.ts_type, ts_a.ts_sub_type, ts_a.period)
