@@ -204,3 +204,12 @@ class Timeseries:
 
     def __len__(self):
         return len(self.dates)
+
+    def linear_transform(self, factor, shift):
+        '''
+        Apply a linear shift to timeseries <values> -> factor * <values> + shift
+        factor : Scaling factor
+        shift : shift
+        '''
+        new_vals = (self.__np_values * factor * 1.0 + shift * 1.0).tolist()
+        return Timeseries(self.dates, new_vals, self.ts_type, self.ts_sub_type, self.period)

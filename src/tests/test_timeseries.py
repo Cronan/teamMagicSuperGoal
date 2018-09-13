@@ -185,3 +185,9 @@ def test_vol_exp(test_ts, vals):
                       np.sqrt((vals2[0] + vals2[1] + vals2[2])/48 + vals2[3]/16  + 
                               vals2[4]/8 + vals2[5]/4 + vals2[6]/2 -
                               av_ts.values[4] * av_ts.values[4]))
+
+def test_shift_and_scale(test_ts, vals):
+    shifted_ts = test_ts.linear_transform(2.0, -50.0)
+    assert len(shifted_ts) == len(test_ts)
+    for ii in range(len(shifted_ts)):
+        assert shifted_ts.values[ii] == vals[ii] * 2.0 - 50.0
