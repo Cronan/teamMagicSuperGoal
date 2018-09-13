@@ -2,14 +2,26 @@ from teammagicsupergoal.utils import PATHS, STOCKS, ETFS
 from teammagicsupergoal.utils import list_files, read_csv_to_df
 import os
 import time
+import pytest
 
 
-def test_etf_list():
-    assert 1300 < len(list_files(PATHS[ETFS]))
+@pytest.fixture
+def etfs():
+    return list_files(PATHS[ETFS])
+
+@pytest.fixture
+def stocks():
+    return list_files(PATHS[STOCKS])
 
 
-def test_stock_list():
-    assert 1300 < len(list_files(PATHS[STOCKS]))
+def test_etf_list(etfs):
+    assert 1300 < len(etfs)
+    assert 'aadr.us.txt' == etfs[0]
+
+
+def test_stock_list(stocks):
+    assert 1300 < len(stocks)
+    assert 'a.us.txt' == stocks[0]
 
 
 def test_read_csv():
@@ -18,11 +30,10 @@ def test_read_csv():
     assert 4521 == len(df)
 
 
-def test_random_100_stocks_load():
+def test_random_100_stocks_load(stocks):
     from pandas.io.common import EmptyDataError
     import random
     t0 = time.time()
-    stocks = list_files(PATHS[STOCKS])
     n = len(stocks)
     l = 100
     start = random.randint(0, n-l)
