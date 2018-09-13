@@ -9,6 +9,7 @@ import pytest
 def etfs():
     return list_files(PATHS[ETFS])
 
+
 @pytest.fixture
 def stocks():
     return list_files(PATHS[STOCKS])
