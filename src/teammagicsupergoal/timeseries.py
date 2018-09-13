@@ -7,6 +7,7 @@ class TimeseriesType:
     RETURNS = "Returns"
     VOL = "Volatility"
     MOVING_AVERAGE = "Moving Average"
+    INDICATOR = "Technical Indicator"
 
 class TimeseriesSubType:
     NONE = "None"
@@ -213,3 +214,19 @@ class Timeseries:
         '''
         new_vals = (self.__np_values * factor * 1.0 + shift * 1.0).tolist()
         return Timeseries(self.dates, new_vals, self.ts_type, self.ts_sub_type, self.period)
+
+    def transform_log_to_fractional_returns(self):        
+        '''
+        Convert log returns to fractional.
+        '''
+        assert self.ts_type == TimeseriesType.RETURNS
+        assert self.ts_sub_type == TimeseriesSubType.LOG
+        new_returns = np.exp(self.__np_values).tolist()
+        return Timeseries(self.dates, new_returns, self.ts_type, TimeseriesSubType.FRACTIONAL)
+
+    def set_indicator_type(self, new_subtype):
+        '''
+        Set the time-series type information
+        '''
+        self.ts_type = TimeseriesType.INDICATOR
+        self.ts_sub_type = new_subtype

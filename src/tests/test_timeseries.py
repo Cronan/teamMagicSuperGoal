@@ -46,7 +46,6 @@ def test_len(test_data):
         assert len(test_data['test_ts']) == 10
     
 
-
 def test_returns_absolute(test_ts, vals, dts):
     returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.ABSOLUTE, 1)
     assert len(returns_ts) == len(test_ts) - 1
@@ -150,6 +149,7 @@ def test_moving_av_exp_truncate(test_ts, vals):
     test_val = test_val * pal + vals[9] * al
     assert np.isclose(av_ts.values[3], test_val)
 
+
 def test_vol_equal(test_ts, vals):
     vol_ts = test_ts.calculate_volatility(ts.TimeseriesSubType.EQUAL, 4)
     vals2 = (np.array(vals) * np.array(vals)).tolist()
@@ -185,6 +185,7 @@ def test_vol_exp(test_ts, vals):
                       np.sqrt((vals2[0] + vals2[1] + vals2[2])/48 + vals2[3]/16  + 
                               vals2[4]/8 + vals2[5]/4 + vals2[6]/2 -
                               av_ts.values[4] * av_ts.values[4]))
+
 
 def test_shift_and_scale(test_ts, vals):
     shifted_ts = test_ts.linear_transform(2.0, -50.0)
