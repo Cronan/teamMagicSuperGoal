@@ -19,6 +19,8 @@ def test_returns_absolute():
     for ii in range(9):
         assert np.isclose(returns_ts.values[ii], vals[ii + 1] - vals[ii])
         assert returns_ts.dates[ii] == dts[ii]
+    latest = test_ts.calculate_latest_return(ts.TimeseriesSubType.ABSOLUTE, 1)
+    assert np.isclose(latest, returns_ts.values[-1])
 
 def test_returns_fractional():
     returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.FRACTIONAL, 2)
@@ -26,6 +28,8 @@ def test_returns_fractional():
     for ii in range(8):
         assert np.isclose(returns_ts.values[ii], vals[ii + 2] / vals[ii])
         assert returns_ts.dates[ii] == dts[ii]
+    latest = test_ts.calculate_latest_return(ts.TimeseriesSubType.FRACTIONAL, 2)
+    assert np.isclose(latest, returns_ts.values[-1])
 
 def test_returns_log():
     returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.LOG, 3)
@@ -33,6 +37,8 @@ def test_returns_log():
     for ii in range(7):
         assert np.isclose(returns_ts.values[ii], np.log(vals[ii + 3] / vals[ii]))
         assert returns_ts.dates[ii] == dts[ii]
+    latest = test_ts.calculate_latest_return(ts.TimeseriesSubType.LOG, 3)
+    assert np.isclose(latest, returns_ts.values[-1])
 
 def test_moving_av_equal():
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, 4)

@@ -9,7 +9,7 @@ class TimeseriesType:
     MOVING_AVERAGE = "Moving Average"
 
 class TimeseriesSubType:
-    NONE : "None"
+    NONE = "None"
     FRACTIONAL = "Fractional"
     LOG = "Logarithmic"
     ABSOLUTE = "Absolute"
@@ -62,6 +62,20 @@ class Timeseries:
         new_ts = Timeseries(new_dates, np_new_values.tolist(), TimeseriesType.RETURNS,
                             returns_type, period)
         return new_ts
+
+    def calculate_latest_return(self, returns_type = TimeseriesSubType.FRACTIONAL, period = 1):
+        '''
+        Calculate the latest return.
+
+        returns_type : Fractional/Logarithmic/Absolute
+        period : number of days to calculate the return over
+        '''
+        if returns_type == TimeseriesSubType.FRACTIONAL:
+            return self.__np_values[-1] / self.__np_values[-period-1]
+        elif returns_type == TimeseriesSubType.ABSOLUTE:
+            return self.__np_values[-1] - self.__np_values[-period-1]
+        elif returns_type == TimeseriesSubType.LOG:
+            return np.log(self.__np_values[-1] / self.__np_values[-period-1])
 
     def calculate_moving_average(self, weigthing_type = TimeseriesSubType.EQUAL, period = 15):
         '''
