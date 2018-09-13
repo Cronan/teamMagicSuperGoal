@@ -9,7 +9,7 @@ class TimeseriesType:
     MOVING_AVERAGE = "Moving Average"
 
 class TimeseriesSubType:
-    NONE : "None"
+    NONE = "None"
     FRACTIONAL = "Fractional"
     LOG = "Logarithmic"
     ABSOLUTE = "Absolute"

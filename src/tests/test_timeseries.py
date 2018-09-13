@@ -1,47 +1,74 @@
 import teammagicsupergoal.timeseries as ts
 import datetime
 import numpy as np
+import pytest
 
-dts = [datetime.date(2018,1,1)]
-for ii in range(1,10) :
-    dts.append(dts[0] + datetime.timedelta(ii))
 
-vals = [100.0, 102.0, 99.0, 101.0, 103.0, 101.5, 103.0, 104.0, 103.5, 105]
+@pytest.fixture
+def test_data():
+    dts = [datetime.date(2018, 1, 1)]
+    for ii in range(1, 10):
+        dts.append(dts[0] + datetime.timedelta(ii))
+    vals = [100.0, 102.0, 99.0, 101.0, 103.0, 101.5, 103.0, 104.0, 103.5, 105]
+    test_dts = ts.Timeseries(dts, vals, ts.TimeseriesType.PRICE, ts.TimeseriesSubType.ABSOLUTE, 1)
+    return {
+        'dts': dts,
+        'vals': vals,
+        'test_ts': test_dts}
 
-test_ts = ts.Timeseries(dts, vals, ts.TimeseriesType.PRICE, ts.TimeseriesSubType.ABSOLUTE, 1)
 
-def test_len():
+@pytest.fixture
+def dts(test_data):
+    return test_data['dts']
+
+
+@pytest.fixture
+def vals(test_data):
+    return test_data['vals']
+
+
+@pytest.fixture
+def test_ts(test_data):
+    return test_data['test_ts']
+
+
+def test_len(test_ts):
     assert len(test_ts) == 10
 
-def test_returns_absolute():
+
+def test_returns_absolute(test_ts, vals, dts):
     returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.ABSOLUTE, 1)
     assert len(returns_ts) == len(test_ts) - 1
     for ii in range(9):
         assert np.isclose(returns_ts.values[ii], vals[ii + 1] - vals[ii])
         assert returns_ts.dates[ii] == dts[ii]
 
-def test_returns_fractional():
+
+def test_returns_fractional(test_ts, vals, dts):
     returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.FRACTIONAL, 2)
     assert len(returns_ts) == len(test_ts) - 2
     for ii in range(8):
         assert np.isclose(returns_ts.values[ii], vals[ii + 2] / vals[ii])
         assert returns_ts.dates[ii] == dts[ii]
 
-def test_returns_log():
+
+def test_returns_log(test_ts, vals, dts):
     returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.LOG, 3)
     assert len(returns_ts) == len(test_ts) - 3
     for ii in range(7):
         assert np.isclose(returns_ts.values[ii], np.log(vals[ii + 3] / vals[ii]))
         assert returns_ts.dates[ii] == dts[ii]
 
-def test_moving_av_equal():
+
+def test_moving_av_equal(test_ts, vals):
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, 4)
     assert len(av_ts) == len(test_ts) - 3
     for ii in range(7):
         assert np.isclose(av_ts.values[ii],
                           (vals[ii + 0] + vals[ii + 1] + vals[ii + 2] + vals[ii + 3])/4.0)
 
-def test_moving_av_exp():
+
+def test_moving_av_exp(test_ts, vals):
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3)
     assert len(av_ts) == len(test_ts) - 2
     assert np.isclose(av_ts.values[0],
@@ -57,7 +84,8 @@ def test_moving_av_exp():
                       (vals[0] + vals[1] + vals[2])/48.0 + vals[3]/16.0 + \
                       vals[4]/8.0 + vals[5]/4.0 + vals[6]/2.0)
 
-def test_vol_equal():
+
+def test_vol_equal(test_ts, vals):
     vol_ts = test_ts.calculate_volatility(ts.TimeseriesSubType.EQUAL, 4)
     vals2 = (np.array(vals) * np.array(vals)).tolist()
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, 4)
@@ -68,7 +96,8 @@ def test_vol_equal():
                           np.sqrt((vals2[ii] + vals2[ii+1] + vals2[ii+2] + vals2[ii+3])/4 -
                                    av_ts.values[ii]*av_ts.values[ii]))
 
-def test_vol_exp():
+
+def test_vol_exp(test_ts, vals):
     vol_ts = test_ts.calculate_volatility(ts.TimeseriesSubType.EXPONENTIAL, 3)
     vals2 = (np.array(vals) * np.array(vals)).tolist()
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3)
