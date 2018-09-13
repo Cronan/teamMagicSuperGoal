@@ -15,22 +15,26 @@ def stocks():
     return list_files(PATHS[STOCKS])
 
 
+@pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="No data")
 def test_etf_list(etfs):
     assert 1300 < len(etfs)
     assert 'aadr.us.txt' == etfs[0]
 
 
+@pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="No data")
 def test_stock_list(stocks):
     assert 1300 < len(stocks)
     assert 'a.us.txt' == stocks[0]
 
 
+@pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="No data")
 def test_read_csv():
     df = read_csv_to_df(os.path.join(PATHS[STOCKS], 'a.us.txt'))
     assert df is not None
     assert 4521 == len(df)
 
 
+@pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="No data")
 def test_random_100_stocks_load(stocks):
     from pandas.io.common import EmptyDataError
     import random
