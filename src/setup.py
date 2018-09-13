@@ -7,6 +7,6 @@ setup(
     install_requires=[
         'flask',
         'pandas',
-        'numpy'
+        'numpy',
     ],
 )

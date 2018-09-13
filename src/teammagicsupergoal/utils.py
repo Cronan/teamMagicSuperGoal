@@ -1,11 +1,21 @@
-import pkg_resources as __pkg_resources
+import os
+from pandas import read_csv
+
+this_dir, this_filename = os.path.split(__file__)
 
 
-def __get_resource_path(package_or_requirement, resource_name):
-    return __pkg_resources.normalize_path(
-        __pkg_resources.resource_filename(
-            package_or_requirement, resource_name))
+STOCKS = 'Stocks'
+ETFS = 'ETFs'
+
+PATHS = {
+    STOCKS: os.path.join(this_dir, "data", 'Stocks'),
+    ETFS: os.path.join(this_dir, "data", "ETFs"),
+}
 
 
-def get_data_path(filename):
-    return __get_resource_path(__name__, 'data/' + filename)
+def list_files(path):
+    return os.listdir(path)
+
+
+def read_csv_to_df(path):
+    return read_csv(path)
