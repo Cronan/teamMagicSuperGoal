@@ -2,9 +2,14 @@ from teammagicsupergoal.timeseries import Timeseries, TimeseriesType, Timeseries
 import numpy as np
 import pandas
 
+DATE_COL_NAME = "Date"
+PRICE_COL_NAME = "Close"
+
 class TechnicalIndicator:
     MOMENTUM = "Momentum"
     RSI = "Relative Strength Indicator"
+    MACD = "Moving Average Convergence Divergence"
+
     def __init__(self, indicator_name):
         self.name = indicator_name
 
@@ -12,11 +17,11 @@ class TechnicalIndicator:
         data = parameter_list[0]
         other_args = parameter_list[1:] if len(parameter_list) > 1 else []
 
-        if type(parameter_list[0] is Timeseries):
+        if type(parameter_list[0]) is Timeseries:
             return self.calculate_current_ts(data, *other_args)
-        elif type(parameter_list[0] is pandas.DataFrame):
+        elif type(parameter_list[0]) is pandas.DataFrame:
             return self.calculate_current_df(data, *other_args)
-        elif type(parameter_list[0] is dict):
+        elif type(parameter_list[0]) is dict:
             return self.calculate_current_all(data, *other_args)
         return None
 
@@ -24,11 +29,11 @@ class TechnicalIndicator:
         data = parameter_list[0]
         other_args = parameter_list[1:] if len(parameter_list) > 1 else []
 
-        if type(parameter_list[0] is Timeseries):
+        if type(parameter_list[0]) is Timeseries:
             return self.calculate_timeseries_ts(data, *other_args)
-        elif type(parameter_list[0] is pandas.DataFrame):
+        elif type(parameter_list[0]) is pandas.DataFrame:
             return self.calculate_timeseries_df(data, *other_args)
-        elif type(parameter_list[0] is dict):
+        elif type(parameter_list[0]) is dict:
             return self.calculate_timeseries_all(data, *other_args)
         return None
 
@@ -95,32 +100,32 @@ class Momentum(TechnicalIndicator):
 
         return mom
 
-    def calculate_current_df(self, df, date_col_name = 'date', 
-                          price_col_name = 'close'):
+    def calculate_current_df(self, df, date_col_name = DATE_COL_NAME,
+                          price_col_name = PRICE_COL_NAME):
         dates = df[date_col_name].tolist()
         prices = df[price_col_name].tolist()
 
         ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
-        return self.calculate_current(ts)
+        return self.calculate_current_ts(ts)
 
-    def calculate_timeseries_df(self, df, date_col_name = 'date', 
-                             price_col_name = 'close'):
+    def calculate_timeseries_df(self, df, date_col_name = DATE_COL_NAME,
+                             price_col_name = PRICE_COL_NAME):
         dates = df[date_col_name].tolist()
         prices = df[price_col_name].tolist()
 
         ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
-        return self.calculate_timeseries(ts)
+        return self.calculate_timeseries_ts(ts)
     
-    def calculate_current_all(self, df_dictionary, date_col_name = 'date',
-                              price_col_name = 'close'):
+    def calculate_current_all(self, df_dictionary, date_col_name = DATE_COL_NAME,
+                              price_col_name = PRICE_COL_NAME):
         results = {}
         for security in df_dictionary:
             results[security] = self.calculate_current_df(df_dictionary[security],
                                                           date_col_name, price_col_name)
         return results
 
-    def calculate_timeseries_all(self, df_dictionary, date_col_name = 'date',
-                                 price_col_name = 'close'):
+    def calculate_timeseries_all(self, df_dictionary, date_col_name = DATE_COL_NAME,
+                                 price_col_name = PRICE_COL_NAME):
         results = {}
         for security in df_dictionary:
             results[security] = self.calculate_timeseries_df(df_dictionary[security],
