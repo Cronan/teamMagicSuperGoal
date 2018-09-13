@@ -2,19 +2,26 @@ import teammagicsupergoal.timeseries as ts
 import datetime
 import numpy as np
 import pytest
+from teammagicsupergoal.utils import read_csv_to_df, PATHS, STOCKS
+import os
 
-
-@pytest.fixture
-def test_data():
-    dts = [datetime.date(2018, 1, 1)]
-    for ii in range(1, 10):
-        dts.append(dts[0] + datetime.timedelta(ii))
-    vals = [100.0, 102.0, 99.0, 101.0, 103.0, 101.5, 103.0, 104.0, 103.5, 105]
-    test_dts = ts.Timeseries(dts, vals, ts.TimeseriesType.PRICE, ts.TimeseriesSubType.ABSOLUTE, 1)
+@pytest.fixture(params=[False, pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="reason")(True)])
+def test_data(request):
+    if request.param:
+        pd = read_csv_to_df(os.path.join(PATHS[STOCKS], 'a.us.txt'))
+        dts = pd['Date'].tolist()
+        vals = pd["Close"].tolist()
+    else:
+        dts = [datetime.date(2018, 1, 1)]
+        for ii in range(1, 10):
+            dts.append(dts[0] + datetime.timedelta(ii))
+        vals = [100.0, 102.0, 99.0, 101.0, 103.0, 101.5, 103.0, 104.0, 103.5, 105]
+    test_ts = ts.Timeseries(dts, vals, ts.TimeseriesType.PRICE, ts.TimeseriesSubType.ABSOLUTE, 1)
     return {
         'dts': dts,
         'vals': vals,
-        'test_ts': test_dts}
+        'test_ts': test_ts,
+        'is_csv': request.param}
 
 
 @pytest.fixture
@@ -32,8 +39,12 @@ def test_ts(test_data):
     return test_data['test_ts']
 
 
-def test_len(test_ts):
-    assert len(test_ts) == 10
+def test_len(test_data):
+    if test_data['is_csv']:
+        assert len(test_data['test_ts']) == 4521
+    else:
+        assert len(test_data['test_ts']) == 10
+    
 
 
 def test_returns_absolute(test_ts, vals, dts):
