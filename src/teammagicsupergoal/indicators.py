@@ -32,22 +32,22 @@ class TechnicalIndicator:
             return self.calculate_timeseries_all(data, *other_args)
         return None
 
-    def calculate_current_ts(self, ts : Timeseries, *parameter_list):
+    def calculate_current_ts(self, ts, *parameter_list):
         raise NotImplementedError
 
-    def calculate_timeseries_ts(self, ts : Timeseries, *parameter_list):
+    def calculate_timeseries_ts(self, ts, *parameter_list):
         raise NotImplementedError
 
-    def calculate_current_df(self, df : pandas.DataFrame, *parameter_list):
+    def calculate_current_df(self, df, *parameter_list):
         raise NotImplementedError
 
-    def calculate_timeseries_df(self, df : pandas.DataFrame, *parameter_list):
+    def calculate_timeseries_df(self, df, *parameter_list):
         raise NotImplementedError
 
-    def calculate_current_all(self, df_dictionary : dict, *parameter_list):
+    def calculate_current_all(self, df_dictionary, *parameter_list):
         raise NotImplementedError
 
-    def calculate_timeseries_all(self, df_dictionary : dict, *parameter_list):
+    def calculate_timeseries_all(self, df_dictionary, *parameter_list):
         raise NotImplementedError
 
 
@@ -56,7 +56,7 @@ class Momentum(TechnicalIndicator):
         TechnicalIndicator.__init__(self, TechnicalIndicator.MOMENTUM)
         self.n_days = n_days
     
-    def calculate_current_ts(self, ts : Timeseries):
+    def calculate_current_ts(self, ts):
         '''
         Calculate the price momentum for the provided time-series
         '''
@@ -73,7 +73,7 @@ class Momentum(TechnicalIndicator):
         
         return None
     
-    def calculate_timeseries_ts(self, ts : Timeseries):
+    def calculate_timeseries_ts(self, ts):
         '''
         Calculate the price momentum for the provided time-series
         '''
@@ -95,7 +95,7 @@ class Momentum(TechnicalIndicator):
 
         return mom
 
-    def calculate_current_df(self, df : pandas.DataFrame, date_col_name = 'date', 
+    def calculate_current_df(self, df, date_col_name = 'date', 
                           price_col_name = 'close'):
         dates = df[date_col_name].tolist()
         prices = df[price_col_name].tolist()
@@ -103,7 +103,7 @@ class Momentum(TechnicalIndicator):
         ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
         return self.calculate_current(ts)
 
-    def calculate_timeseries_df(self, df : pandas.DataFrame, date_col_name = 'date', 
+    def calculate_timeseries_df(self, df, date_col_name = 'date', 
                              price_col_name = 'close'):
         dates = df[date_col_name].tolist()
         prices = df[price_col_name].tolist()
@@ -111,7 +111,7 @@ class Momentum(TechnicalIndicator):
         ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
         return self.calculate_timeseries(ts)
     
-    def calculate_current_all(self, df_dictionary : dict, date_col_name = 'date',
+    def calculate_current_all(self, df_dictionary, date_col_name = 'date',
                               price_col_name = 'close'):
         results = {}
         for security in df_dictionary:
@@ -119,7 +119,7 @@ class Momentum(TechnicalIndicator):
                                                           date_col_name, price_col_name)
         return results
 
-    def calculate_timeseries_all(self, df_dictionary : dict, date_col_name = 'date',
+    def calculate_timeseries_all(self, df_dictionary, date_col_name = 'date',
                                  price_col_name = 'close'):
         results = {}
         for security in df_dictionary:
