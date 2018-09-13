@@ -73,13 +73,13 @@ class Timeseries:
         moving_average = None
         
         if weigthing_type == TimeseriesSubType.EQUAL:
-            np_sum = self.__np_values[period-1:]
+            np_sum = self.__np_values[period - 1:]
             for ii in range(1, period):
-                np_sum = np_sum + self.__np_values[period-ii-1: -ii]
+                np_sum = np_sum + self.__np_values[period - ii - 1: -ii]
             moving_average = (np_sum / period).tolist()
         elif weigthing_type == TimeseriesSubType.EXPONENTIAL:
             moving_average = []
-            alpha = 2.0/(period + 1.0)
+            alpha = 2.0 / (period + 1.0)
             moving_average.append(sum(self.__np_values[0:period])/period)
             for val in self.values[period:]:
                 new_av = val * alpha + moving_average[-1] * (1.0 - alpha)
@@ -89,3 +89,41 @@ class Timeseries:
                             TimeseriesType.MOVING_AVERAGE, weigthing_type, period)
         return new_ts
 
+    def calculate_volatility(self, weighting_type, period = 30, moving_average = None):
+        '''
+        Calculate a new time-series based on the volatility of this timeseries
+        Returned time-series is indexed by last date in volatility period
+
+        weighting_type : Exponential/Equal
+        period : period for volatility calculation
+        moving_average : Moving average time-series (if None then calculated on the fly)
+        '''
+        if moving_average is None:
+            moving_average = self.calculate_moving_average(weighting_type, period)
+
+        vals_sq = self.__np_values * self.__np_values
+
+        if weighting_type == TimeseriesSubType.EQUAL:
+            np_sum_sq = vals_sq[period - 1:]
+            for ii in range(1, period):
+                np_sum_sq = np_sum_sq + vals_sq[period - ii - 1: -ii]
+            np_volatilities = np.sqrt((np_sum_sq / period) - \
+                                   (moving_average.__np_values * moving_average.__np_values))
+        elif weighting_type == TimeseriesSubType.EXPONENTIAL:
+            sum_weighted_squares = []
+            alpha = 2.0 / (period + 1.0)
+            sum_weighted_squares.append(sum(self.__np_values[0:period] * \
+                                        self.__np_values[0:period])/period)
+            for val2 in vals_sq[period:]:
+                new_val2 = val2 * alpha + sum_weighted_squares[-1] * (1.0 - alpha)
+                sum_weighted_squares.append(new_val2)
+            np_volatilities = np.sqrt(np.array(sum_weighted_squares) - \
+                                      moving_average.__np_values * moving_average.__np_values)
+
+        new_ts = Timeseries(self.dates[period-1:], np_volatilities.tolist(), \
+                            TimeseriesType.VOL, weighting_type, period)
+
+        return new_ts
+
+    def __len__(self):
+        return len(self.dates)
