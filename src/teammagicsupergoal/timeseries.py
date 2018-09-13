@@ -57,7 +57,7 @@ class Timeseries:
         elif returns_type == TimeseriesSubType.LOG:
             np_new_values = np.log(self.__np_values[period:] / self.__np_values[0:-period])
 
-        new_ts = Timeseries(new_dates, np_new_values.toList(), TimeseriesType.RETURNS, returns_type, period)
+        new_ts = Timeseries(new_dates, np_new_values.tolist(), TimeseriesType.RETURNS, returns_type, period)
         return new_ts
         
         
