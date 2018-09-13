@@ -6,14 +6,16 @@ class TimeseriesType:
     PRICE = "Price"
     RETURNS = "Returns"
     VOL = "Volatility"
+    MOVING_AVERAGE = "Moving Average"
 
 class TimeseriesSubType:
+    NONE : "None"
     FRACTIONAL = "Fractional"
     LOG = "Logarithmic"
     ABSOLUTE = "Absolute"
     RELATIVE = "Relative"
-    EMA = "Exp. weighted Moving Av."
-    AVERAGE = "Equally weighted Av."
+    EXPONENTIAL = "Exponential"
+    EQUAL = "Equal"
 
 class Timeseries:
     def __init__(self, dates, values, tsType = None, tsSubType = None, period = None):
@@ -57,7 +59,33 @@ class Timeseries:
         elif returns_type == TimeseriesSubType.LOG:
             np_new_values = np.log(self.__np_values[period:] / self.__np_values[0:-period])
 
-        new_ts = Timeseries(new_dates, np_new_values.tolist(), TimeseriesType.RETURNS, returns_type, period)
+        new_ts = Timeseries(new_dates, np_new_values.tolist(), TimeseriesType.RETURNS,
+                            returns_type, period)
         return new_ts
+
+    def calculate_moving_average(self, weigthing_type = TimeseriesSubType.EQUAL, period = 15):
+        '''
+        Calculate moving average for current time-series
+
+        weigthing_type : Exponential/Equal
+        period : period for moving average calculation
+        '''
+        moving_average = None
         
+        if weigthing_type == TimeseriesSubType.EQUAL:
+            np_sum = self.__np_values[period-1:]
+            for ii in range(1, period):
+                np_sum = np_sum + self.__np_values[period-ii-1: -ii]
+            moving_average = (np_sum / period).tolist()
+        elif weigthing_type == TimeseriesSubType.EXPONENTIAL:
+            moving_average = []
+            alpha = 2.0/(period + 1.0)
+            moving_average.append(sum(self.__np_values[0:period])/period)
+            for val in self.values[period:]:
+                new_av = val * alpha + moving_average[-1] * (1.0 - alpha)
+                moving_average.append(new_av)
         
+        new_ts = Timeseries(self.dates[period-1:], moving_average,
+                            TimeseriesType.MOVING_AVERAGE, weigthing_type, period)
+        return new_ts
+
