@@ -131,30 +131,38 @@ class Timeseries:
                 total_wgt = total_wgt * (1 - alpha) + 1
 
             return total / total_wgt
-        return None
+        assert False
 
-    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, truncate_days = None):
-        if truncate_days == None:
-            return self.calculate_moving_average(weighting_type, period)
+    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, start_idx = None):
+        '''
+        Calculate a moving average timeseries
+
+        weighting_type : Equal/Exponential
+        period : Period to use for calculation
+        start_idx : Index to start calculation for
+        '''
+        if start_idx == None:
+            start_idx = period - 1
+        if period > start_idx + 1:
+            start_idx = period - 1
 
         moving_average = None
 
-        start_idx = min(len(self) - truncate_days, 0) if truncate_days != None else 0
-
         if weighting_type == TimeseriesSubType.EQUAL:
-            np_sum = self.__np_values[start_idx + period - 1:]
+            np_sum = self.__np_values[start_idx:]
             for ii in range(1, period):
-                np_sum = np_sum + self.__np_values[start_idx + period - 1 - ii: -ii]
+                np_sum = np_sum + self.__np_values[start_idx - ii: -ii]
             moving_average = (np_sum / period).tolist()
         elif weighting_type == TimeseriesSubType.EXPONENTIAL:
             moving_average = []
+            moving_average.append(self.calculate_single_moving_average(weighting_type, period, start_idx))
             alpha = 2.0 / (period + 1.0)
-            moving_average.append(sum(self.__np_values[0:period])/period)
-            for val in self.values[period:]:
+
+            for val in self.values[start_idx + 1:]:
                 new_av = val * alpha + moving_average[-1] * (1.0 - alpha)
                 moving_average.append(new_av)
 
-        new_ts = Timeseries(self.dates[start_idx + period - 1:], moving_average,
+        new_ts = Timeseries(self.dates[start_idx:], moving_average,
                             TimeseriesType.MOVING_AVERAGE, weighting_type, period)
         return new_ts
 

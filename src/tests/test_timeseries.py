@@ -132,6 +132,24 @@ def test_moving_av_exp(test_ts, vals):
                       vals[4]/8.0 + vals[5]/4.0 + vals[6]/2.0)
 
 
+def test_moving_av_exp_truncate(test_ts, vals):
+    av_ts = test_ts.calculate_moving_average_truncate(ts.TimeseriesSubType.EXPONENTIAL, 4, 6)
+    al = 2.0/5.0
+    pal = 1 - al
+    test_val = (vals[6] + pal * (vals[5] + pal *
+                                 (vals[4] + pal *
+                                  (vals[3] + pal *
+                                   (vals[2] + pal *
+                                    (vals[1] + pal * vals[0]
+                                     )))))) * al / (1-np.power(pal, 7))
+    assert np.isclose(av_ts.values[0], test_val)
+    test_val = test_val * pal + vals[7] * al
+    assert np.isclose(av_ts.values[1], test_val)
+    test_val = test_val * pal + vals[8] * al
+    assert np.isclose(av_ts.values[2], test_val)
+    test_val = test_val * pal + vals[9] * al
+    assert np.isclose(av_ts.values[3], test_val)
+
 def test_vol_equal(test_ts, vals):
     vol_ts = test_ts.calculate_volatility(ts.TimeseriesSubType.EQUAL, 4)
     vals2 = (np.array(vals) * np.array(vals)).tolist()

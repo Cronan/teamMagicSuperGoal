@@ -14,7 +14,9 @@ PATHS = {
 
 
 def list_files(path):
-    return os.listdir(path)
+    files = os.listdir(path)
+    files.sort()
+    return files
 
 
 def read_csv_to_df(path):
