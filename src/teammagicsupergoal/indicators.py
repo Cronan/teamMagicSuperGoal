@@ -192,7 +192,7 @@ class RSI(TechnicalIndicator):
         TechnicalIndicator.__init__(self, TechnicalIndicator.RSI)
         self.period = period
 
-    def calculate_current_ts(self, ts: Timeseries):
+    def calculate_current_ts(self, ts):
         abs_returns = ts.calculate_returns(TimeseriesSubType.ABSOLUTE)
         gains = sum(x for x in abs_returns.values[-self.period:] if x > 0)
         losses = abs(sum(x for x in abs_returns.values[-self.period:] if x < 0))
@@ -200,7 +200,7 @@ class RSI(TechnicalIndicator):
         rsi = 100.0 - ((100.0 / (1.0 + gains/losses)) if losses > 0 else 0)
         return rsi
     
-    def calculate_timeseries_ts(self, ts: Timeseries):
+    def calculate_timeseries_ts(self, ts):
         if self.period > len(ts):
             return Timeseries([],[], TimeseriesType.INDICATOR, TechnicalIndicator.RSI)
 
