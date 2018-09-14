@@ -26,7 +26,7 @@ def test_data(request):
         'vals': vals,
         'test_ts': test_ts,
         'is_csv': request.param,
-        'pd': pd}
+        'pd' : pd}
 
 
 @pytest.fixture
@@ -86,11 +86,13 @@ def test_momentum_timeseries(test_ts, vals, dts, is_csv, pd):
         assert np.isclose(mom_ts.values[3], 109.0/1.01)
     else:
         n_checks = min(20, len(vals)-10)
-        mom_df = momIndicator.calculate_timeseries_df(pd)
+        mom_ts_pd = momIndicator.calculate_timeseries_df(pd)
         for ii in range(n_checks):
             assert np.isclose(mom_ts.values[ii],
                               100.0 * vals[ii + 10] / vals[ii])
-            assert np.isclose(mom_ts.values[ii], mom_df.values[ii])
+            assert np.isclose(mom_ts_pd.values[ii], 
+                              100.0 * vals[ii + 10] / vals[ii])
+
 
 def test_latest_momentum_outer(test_ts, vals, dts, is_csv, pd):
     momIndicator = Momentum(12)
@@ -100,10 +102,10 @@ def test_latest_momentum_outer(test_ts, vals, dts, is_csv, pd):
         assert np.isclose(mom, 100.0 * 115.0 / 104.0)
     else:
         assert np.isclose(mom, 100.0*vals[-1] / vals[-13])
-        mom_df = momIndicator.calculate_current(pd)
-        mom_dict = momIndicator.calculate_current({"a":pd})
-        assert np.isclose(mom, mom_df)
-        assert np.isclose(mom, mom_dict["a"])
+        mom_pd = momIndicator.calculate_current(pd)
+        assert np.isclose(mom_pd, 100.0*vals[-1] / vals[-13])
+        mom_dict = momIndicator.calculate_current({"a": pd})
+        assert np.isclose(mom_dict["a"], 100.0*vals[-1] / vals[-13])
 
 
 def test_momentum_timeseries_outer(test_ts, vals, dts, is_csv, pd):
@@ -116,10 +118,13 @@ def test_momentum_timeseries_outer(test_ts, vals, dts, is_csv, pd):
         assert np.isclose(mom_ts.values[3], 109.0/1.01)
     else:
         n_checks = min(20, len(vals)-10)
-        mom_df = momIndicator.calculate_timeseries(pd)
-        mom_dict = momIndicator.calculate_timeseries({"a":pd})
+        mom_pd = momIndicator.calculate_timeseries(pd)
+        mom_dict = momIndicator.calculate_timeseries({"a": pd})
+
         for ii in range(n_checks):
             assert np.isclose(mom_ts.values[ii], 
                               100.0 * vals[ii + 10] / vals[ii])
-            assert np.isclose(mom_ts.values[ii], mom_df.values[ii])
-            assert np.isclose(mom_ts.values[ii], mom_dict["a"].values[ii])
+            assert np.isclose(mom_pd.values[ii], 
+                              100.0 * vals[ii + 10] / vals[ii])
+            assert np.isclose(mom_dict["a"].values[ii], 
+                              100.0 * vals[ii + 10] / vals[ii])

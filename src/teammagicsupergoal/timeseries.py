@@ -114,7 +114,8 @@ class Timeseries:
                             TimeseriesType.MOVING_AVERAGE, weighting_type, period)
         return new_ts
 
-    def calculate_single_moving_average(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, index = None):
+    def calculate_single_moving_average(self, weighting_type = TimeseriesSubType.EQUAL,
+                                        period = 15, index = None):
         '''
         Calculate the latest moving average.  Where exponential weighting is used, calculation is
         truncated to point with weighting of 1/100th of latest point.
@@ -144,7 +145,8 @@ class Timeseries:
             return total / total_wgt
         assert False
 
-    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, start_idx = None):
+    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL,
+                                          period = 15, start_idx = None):
         '''
         Calculate a moving average timeseries
 
@@ -245,3 +247,23 @@ class Timeseries:
         '''
         self.ts_type = TimeseriesType.INDICATOR
         self.ts_sub_type = new_subtype
+
+    def create_truncate(self, truncate_length):
+        if truncate_length > len(self):
+            truncate_length = len(self)
+
+        return Timeseries(self.dates[-truncate_length:],
+                          self.values[-truncate_length:],
+                          self.ts_type, self.ts_sub_type, self.period)
+
+    @staticmethod
+    def linearly_combine(ts_a, scale_a, ts_b, scale_b):
+        new_dates = list(set(ts_a.dates).intersection(ts_b.dates))
+        new_dates.sort()
+
+        new_values = []
+        for date in new_dates:
+            new_values.append(ts_a.values[ts_a.dates.index(date)] * scale_a +
+                              ts_b.values[ts_a.dates.index(date)] * scale_b)
+
+        return Timeseries(new_dates, new_values, ts_a.ts_type, ts_a.ts_sub_type, ts_a.period)
