@@ -61,9 +61,9 @@ def test_latest_momentum(test_ts, vals, dts, is_csv, pd):
     if not is_csv:
         assert np.isclose(mom, 100.0 * 115.0 / 104.0)
     else:
-        assert np.isclose(mom, 100.0*vals[-1] / vals[-13])
-        mom = momIndicator.calculate_current_df(pd)
         assert np.isclose(mom, 100.0 * vals[-1] / vals[-13])
+        mom_df = momIndicator.calculate_current_df(pd)
+        assert np.isclose(mom, mom_df)
 
 
 def test_latest_momentum_overlong(test_ts, vals):
@@ -88,7 +88,7 @@ def test_momentum_timeseries(test_ts, vals, dts, is_csv, pd):
         n_checks = min(20, len(vals)-10)
         mom_ts_pd = momIndicator.calculate_timeseries_df(pd)
         for ii in range(n_checks):
-            assert np.isclose(mom_ts.values[ii], 
+            assert np.isclose(mom_ts.values[ii],
                               100.0 * vals[ii + 10] / vals[ii])
             assert np.isclose(mom_ts_pd.values[ii], 
                               100.0 * vals[ii + 10] / vals[ii])
