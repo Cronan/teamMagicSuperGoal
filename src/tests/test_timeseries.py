@@ -76,12 +76,41 @@ def test_returns_log(test_ts, vals, dts):
     assert np.isclose(latest, returns_ts.values[-1])
 
 
+def test_returns_overlong(test_ts):
+    returns_ts = test_ts.calculate_returns(ts.TimeseriesSubType.FRACTIONAL, len(test_ts))
+    assert len(returns_ts) == 0
+
+
 def test_moving_av_equal(test_ts, vals):
     av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, 4)
     assert len(av_ts) == len(test_ts) - 3
     for ii in range(len(test_ts) - 4):
         assert np.isclose(av_ts.values[ii],
                           (vals[ii + 0] + vals[ii + 1] + vals[ii + 2] + vals[ii + 3])/4.0)
+
+
+def test_moving_av_exp(test_ts, vals):
+    av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3)
+    assert len(av_ts) == len(test_ts) - 2
+    assert np.isclose(av_ts.values[0],
+                      (vals[0] + vals[1] + vals[2])/3.0)
+    assert np.isclose(av_ts.values[1],
+                      (vals[0] + vals[1] + vals[2])/6.0 + vals[3]/2.0)
+    assert np.isclose(av_ts.values[2],
+                      (vals[0] + vals[1] + vals[2])/12.0 + vals[3]/4.0 + vals[4]/2.0)
+    assert np.isclose(av_ts.values[3],
+                      (vals[0] + vals[1] + vals[2])/24.0 + vals[3]/8.0 + \
+                      vals[4]/4.0 + vals[5]/2.0)
+    assert np.isclose(av_ts.values[4],
+                      (vals[0] + vals[1] + vals[2])/48.0 + vals[3]/16.0 + \
+                      vals[4]/8.0 + vals[5]/4.0 + vals[6]/2.0)
+
+
+def test_moving_av_overlong(test_ts, vals):
+    av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, len(test_ts))
+    assert len(av_ts) == 1
+    av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EQUAL, len(test_ts)+1)
+    assert len(av_ts) == 0
 
 
 def test_single_moving_av_equal(test_ts, vals):
@@ -114,21 +143,9 @@ def test_single_moving_av_exp(test_ts, vals):
                       test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 2, -3))
 
 
-def test_moving_av_exp(test_ts, vals):
-    av_ts = test_ts.calculate_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 3)
-    assert len(av_ts) == len(test_ts) - 2
-    assert np.isclose(av_ts.values[0],
-                      (vals[0] + vals[1] + vals[2])/3.0)
-    assert np.isclose(av_ts.values[1],
-                      (vals[0] + vals[1] + vals[2])/6.0 + vals[3]/2.0)
-    assert np.isclose(av_ts.values[2],
-                      (vals[0] + vals[1] + vals[2])/12.0 + vals[3]/4.0 + vals[4]/2.0)
-    assert np.isclose(av_ts.values[3],
-                      (vals[0] + vals[1] + vals[2])/24.0 + vals[3]/8.0 + \
-                      vals[4]/4.0 + vals[5]/2.0)
-    assert np.isclose(av_ts.values[4],
-                      (vals[0] + vals[1] + vals[2])/48.0 + vals[3]/16.0 + \
-                      vals[4]/8.0 + vals[5]/4.0 + vals[6]/2.0)
+def test_single_moving_av_overlong(test_ts):
+    assert np.isnan(test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, 1 + len(test_ts)))
+    assert not np.isnan(test_ts.calculate_single_moving_average(ts.TimeseriesSubType.EXPONENTIAL, len(test_ts)))
 
 
 def test_moving_av_exp_truncate(test_ts, vals):
