@@ -162,7 +162,70 @@ class MACD(TechnicalIndicator):
         signal = macd.calculate_moving_average(TimeseriesSubType.EXPONENTIAL,
                                                self.signal_days)
         macd = macd.create_truncate(len(signal))
+
+        if macd != None:
+            macd.set_indicator_type(TechnicalIndicator.MACD)
+        if signal != None:
+            signal.set_indicator_type(TechnicalIndicator.MACD)
+
         return (macd, signal)
+
+    def calculate_current_df(self, df, date_col_name = DATE_COL_NAME,
+                             price_col_name = PRICE_COL_NAME):
+        dates = df[date_col_name].tolist()
+        prices = df[price_col_name].tolist()
+
+        ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
+        return self.calculate_current_ts(ts)
+
+    def calculate_timeseries_df(self, df, date_col_name = DATE_COL_NAME,
+                                price_col_name = PRICE_COL_NAME):
+        dates = df[date_col_name].tolist()
+        prices = df[price_col_name].tolist()
+
+        ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
+        return self.calculate_timeseries_ts(ts)
+
+
+class RSI(TechnicalIndicator):
+    def __init__(self, period = 10):
+        TechnicalIndicator.__init__(self, TechnicalIndicator.RSI)
+        self.period = period
+
+    def calculate_current_ts(self, ts):
+        abs_returns = ts.calculate_returns(TimeseriesSubType.ABSOLUTE)
+        gains = sum(x for x in abs_returns.values[-self.period:] if x > 0)
+        losses = abs(sum(x for x in abs_returns.values[-self.period:] if x < 0))
+
+        rsi = 100.0 - ((100.0 / (1.0 + gains/losses)) if losses > 0 else 0)
+        return rsi
+    
+    def calculate_timeseries_ts(self, ts):
+        if self.period > len(ts):
+            return Timeseries([],[], TimeseriesType.INDICATOR, TechnicalIndicator.RSI)
+
+        if ts.ts_type == TimeseriesType.PRICE:
+            abs_returns = ts.calculate_returns(TimeseriesSubType.ABSOLUTE)
+        elif ts.ts_type == TimeseriesType.RETURNS:
+            abs_returns = ts
+
+        vals_np = np.array(abs_returns.values)
+        up_vals_np = vals_np.clip(min = 0)
+        dn_vals_np = vals_np.clip(max = 0)
+
+        up_sum = up_vals_np[self.period - 1:]
+        dn_sum = -dn_vals_np[self.period - 1:]
+        
+        for ii in range(1, self.period):
+            up_sum = up_sum + up_vals_np[self.period - 1 - ii: -ii]
+            dn_sum = dn_sum - dn_vals_np[self.period - 1 - ii: -ii]
+
+        rsi_vals = []
+        for ii in range(len(up_sum)):
+            rsi_vals.append(100.0 - (100.0 / (1.0 + up_sum[ii]/dn_sum[ii])) if dn_sum[ii] > 0 else 0)
+
+        return Timeseries(abs_returns.dates[self.period - 1:], rsi_vals,
+                          TimeseriesType.INDICATOR, TechnicalIndicator.RSI)
 
     def calculate_current_df(self, df, date_col_name = DATE_COL_NAME,
                              price_col_name = PRICE_COL_NAME):

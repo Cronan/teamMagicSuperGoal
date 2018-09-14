@@ -1,5 +1,5 @@
 import teammagicsupergoal.timeseries as ts
-from teammagicsupergoal.indicators import Momentum, MACD
+from teammagicsupergoal.indicators import Momentum, MACD, RSI
 import numpy as np
 import datetime
 import pytest
@@ -165,3 +165,27 @@ def test_latest_macd_outer(test_ts, vals, is_csv, pd):
         (macd_dict, signal_dict) = macd_calc.calculate_current({"a":pd})["a"]
         assert np.isclose(macd_dict, macd)
         assert np.isclose(signal_dict, signal)
+
+
+def test_latest_rsi(test_ts, vals, is_csv, pd):
+    rsi_calc = RSI(10)
+    rsi = rsi_calc.calculate_current_ts(test_ts)
+    if not is_csv:
+        assert np.isclose(100.0 - 100.0 / (1 + 12.5/2.5), rsi)
+    else:
+        rsi_df = rsi_calc.calculate_current_df(pd)
+        assert np.isclose(rsi, rsi_df)
+
+def test_timeseries_rsi(test_ts, vals, is_csv, pd):
+    rsi_calc = RSI(10)
+    rsi = rsi_calc.calculate_current_ts(test_ts)
+    rsi_ts = rsi_calc.calculate_timeseries_ts(test_ts)
+    if not is_csv:
+        assert np.isclose(100.0 - 100.0 / (1 + 12.5/2.5), rsi_ts.values[-1])
+        assert np.isclose(100.0 - 100.0 / (1 + 12.5/2.5), rsi_ts.values[-2])
+        assert np.isclose(100.0 - 100.0 / (1 + 12.5/2.5), rsi_ts.values[-3])
+        assert np.isclose(100.0 - 100.0 / (1 + 11.5/2.5), rsi_ts.values[-4])
+        assert np.isclose(100.0 - 100.0 / (1 + 10.5/2.5), rsi_ts.values[-5])
+        assert np.isclose(100.0 - 100.0 / (1 + 10.5/2.5), rsi_ts.values[-6])
+    else:
+        assert np.isclose(rsi_ts.values[-1], rsi)
