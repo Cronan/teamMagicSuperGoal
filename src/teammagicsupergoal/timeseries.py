@@ -264,6 +264,6 @@ class Timeseries:
         new_values = []
         for date in new_dates:
             new_values.append(ts_a.values[ts_a.dates.index(date)] * scale_a +
-                              ts_b.values[ts_a.dates.index(date)] * scale_b)
+                              ts_b.values[ts_b.dates.index(date)] * scale_b)
 
         return Timeseries(new_dates, new_values, ts_a.ts_type, ts_a.ts_sub_type, ts_a.period)
