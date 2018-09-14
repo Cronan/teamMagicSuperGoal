@@ -66,8 +66,8 @@
     <div class="container">
         <div class="row">
             <ul>
-              {% for key, value in secs.iteritems() %}
-              <li><a href="/security/{{value}}">{{key}}</a></li>
+              {% for kv in secs|dictsort %}
+              <li><a href="/security/{{kv[1]}}">{{kv[0]}}</a></li>
               {% endfor %}
             </ul>
          </div>

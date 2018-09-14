@@ -36,23 +36,14 @@ def test_read_csv():
 
 @pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="No data")
 def test_random_100_stocks_load(stocks):
-    from pandas.io.common import EmptyDataError
     import random
     t0 = time.time()
     n = len(stocks)
     l = 100
     start = random.randint(0, n-l)
     for file_name in stocks[start:start + l]:
-        try:
-            file_path = os.path.join(PATHS[STOCKS], file_name)
-            df = read_csv_to_df(file_path)
+        df = read_csv_to_df(os.path.join(PATHS[STOCKS], file_name))
+        if df is not None:
             assert 0 < len(df)
-        except EmptyDataError:
-            continue
-        except:
-            print(file_path)
-            raise
-        assert df is not None
-        assert 0 < len(df)
     t1 = time.time()
     assert 5 > t1 - t0
