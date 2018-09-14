@@ -104,7 +104,8 @@ class Timeseries:
                             TimeseriesType.MOVING_AVERAGE, weighting_type, period)
         return new_ts
 
-    def calculate_single_moving_average(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, index = None):
+    def calculate_single_moving_average(self, weighting_type = TimeseriesSubType.EQUAL,
+                                        period = 15, index = None):
         '''
         Calculate the latest moving average.  Where exponential weighting is used, calculation is
         truncated to point with weighting of 1/100th of latest point.
@@ -134,7 +135,8 @@ class Timeseries:
             return total / total_wgt
         assert False
 
-    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL, period = 15, start_idx = None):
+    def calculate_moving_average_truncate(self, weighting_type = TimeseriesSubType.EQUAL,
+                                          period = 15, start_idx = None):
         '''
         Calculate a moving average timeseries
 
