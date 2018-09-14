@@ -145,6 +145,10 @@ class MACD(TechnicalIndicator):
         slow = ts.calculate_moving_average_truncate(TimeseriesSubType.EXPONENTIAL,
                                                     self.long_days, -self.signal_days)
         macd = Timeseries.linearly_combine(fast, 1.0, slow, -1.0)
+
+        if len(macd) == 0:
+            return (np.NaN, np.NaN)
+
         signal = macd.calculate_single_moving_average(TimeseriesSubType.EXPONENTIAL,
                                                       self.signal_days)
         return (macd.values[-1], signal)

@@ -1,5 +1,5 @@
 import teammagicsupergoal.timeseries as ts
-from teammagicsupergoal.indicators import Momentum
+from teammagicsupergoal.indicators import Momentum, MACD
 import numpy as np
 import datetime
 import pytest
@@ -128,3 +128,40 @@ def test_momentum_timeseries_outer(test_ts, vals, dts, is_csv, pd):
                               100.0 * vals[ii + 10] / vals[ii])
             assert np.isclose(mom_dict["a"].values[ii], 
                               100.0 * vals[ii + 10] / vals[ii])
+
+
+def test_latest_macd(test_ts, vals, is_csv, pd):
+    macd_calc = MACD()
+    (macd, signal) = macd_calc.calculate_current_ts(test_ts)
+    if not is_csv:
+        assert np.isnan(macd) and np.isnan(signal)
+    else:
+        # I can't be bothered to do full calculation,
+        # so make sure the values are sensible
+        slow_average = sum(vals[-26:]) / 26.0
+        fast_average = sum(vals[-12:]) / 12.0
+        assert abs(macd) <= abs(2*(fast_average - slow_average))
+        assert abs(signal) <= abs(2*(fast_average - slow_average))
+        (macd_df, signal_df) = macd_calc.calculate_current_df(pd)
+        assert np.isclose(macd_df, macd)
+        assert np.isclose(signal_df, signal)
+
+
+def test_latest_macd_outer(test_ts, vals, is_csv, pd):
+    macd_calc = MACD()
+    (macd, signal) = macd_calc.calculate_current(test_ts)
+    if not is_csv:
+        assert np.isnan(macd) and np.isnan(signal)
+    else:
+        # I can't be bothered to do full calculation,
+        # so make sure the values are sensible
+        slow_average = sum(vals[-26:]) / 26.0
+        fast_average = sum(vals[-12:]) / 12.0
+        assert abs(macd) <= abs(2*(fast_average - slow_average))
+        assert abs(signal) <= abs(2*(fast_average - slow_average))
+        (macd_df, signal_df) = macd_calc.calculate_current(pd)
+        assert np.isclose(macd_df, macd)
+        assert np.isclose(signal_df, signal)
+        (macd_dict, signal_dict) = macd_calc.calculate_current({"a":pd})["a"]
+        assert np.isclose(macd_dict, macd)
+        assert np.isclose(signal_dict, signal)

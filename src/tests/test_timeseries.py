@@ -217,3 +217,12 @@ def test_truncate(test_ts):
     for ii in range(1, 8):
         assert np.isclose(shortened_ts.values[-ii], test_ts.values[-ii])
 
+
+def test_linear_combine(test_ts, vals, dts):
+    other_ts = test_ts.create_truncate(8)
+    combined_ts = ts.Timeseries.linearly_combine(test_ts, 1.0, other_ts, 0.5)
+    assert len(combined_ts) == 8
+    for ii in range(1, 9):
+        assert combined_ts.dates[-ii] == other_ts.dates[-ii]
+        assert combined_ts.dates[-ii] == dts[-ii]
+        assert np.isclose(combined_ts.values[-ii], 1.5 * vals[-ii])
