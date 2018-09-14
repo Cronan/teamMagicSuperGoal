@@ -209,3 +209,11 @@ def test_shift_and_scale(test_ts, vals):
     assert len(shifted_ts) == len(test_ts)
     for ii in range(len(shifted_ts)):
         assert shifted_ts.values[ii] == vals[ii] * 2.0 - 50.0
+
+
+def test_truncate(test_ts):
+    shortened_ts = test_ts.create_truncate(7)
+    assert len(shortened_ts) == 7
+    for ii in range(1, 8):
+        assert np.isclose(shortened_ts.values[-ii], test_ts.values[-ii])
+

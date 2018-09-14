@@ -50,10 +50,24 @@ class TechnicalIndicator:
         raise NotImplementedError
 
     def calculate_current_all(self, df_dictionary, *parameter_list):
-        raise NotImplementedError
+        results = {}
+        for security in df_dictionary:
+            if df_dictionary[security] is not None:
+                results[security] = self.calculate_current_df(df_dictionary[security],
+                                                              *parameter_list)
+            else:
+                results[security] = None
+        return results
 
     def calculate_timeseries_all(self, df_dictionary, *parameter_list):
-        raise NotImplementedError
+        results = {}
+        for security in df_dictionary:
+            if df_dictionary[security] is not None:
+                results[security] = self.calculate_timeseries_df(df_dictionary[security],
+                                                                 *parameter_list)
+            else:
+                results[security] = None
+        return results
 
 
 class Momentum(TechnicalIndicator):
@@ -109,25 +123,55 @@ class Momentum(TechnicalIndicator):
         return self.calculate_current_ts(ts)
 
     def calculate_timeseries_df(self, df, date_col_name = DATE_COL_NAME,
-                             price_col_name = PRICE_COL_NAME):
+                                price_col_name = PRICE_COL_NAME):
         dates = df[date_col_name].tolist()
         prices = df[price_col_name].tolist()
 
         ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
         return self.calculate_timeseries_ts(ts)
-    
-    def calculate_current_all(self, df_dictionary, date_col_name = DATE_COL_NAME,
-                              price_col_name = PRICE_COL_NAME):
-        results = {}
-        for security in df_dictionary:
-            results[security] = self.calculate_current_df(df_dictionary[security],
-                                                          date_col_name, price_col_name)
-        return results
 
-    def calculate_timeseries_all(self, df_dictionary, date_col_name = DATE_COL_NAME,
-                                 price_col_name = PRICE_COL_NAME):
-        results = {}
-        for security in df_dictionary:
-            results[security] = self.calculate_timeseries_df(df_dictionary[security],
-                                                             date_col_name, price_col_name)
-        return results
+
+class MACD(TechnicalIndicator):
+    def __init__(self, short_days = 12, long_days = 26, signal_days = 9):
+        TechnicalIndicator.__init__(self, TechnicalIndicator.MACD)
+        assert short_days < long_days
+        self.long_days = long_days
+        self.short_days = short_days
+        self.signal_days = signal_days
+
+    def calculate_current_ts(self, ts):
+        fast = ts.calculate_moving_average_truncate(TimeseriesSubType.EXPONENTIAL,
+                                                    self.short_days, -self.signal_days)
+        slow = ts.calculate_moving_average_truncate(TimeseriesSubType.EXPONENTIAL,
+                                                    self.long_days, -self.signal_days)
+        macd = Timeseries.linearly_combine(fast, 1.0, slow, -1.0)
+        signal = macd.calculate_single_moving_average(TimeseriesSubType.EXPONENTIAL,
+                                                      self.signal_days)
+        return (macd.values[-1], signal)
+
+    def calculate_timeseries_ts(self, ts):
+        fast = ts.calculate_moving_average(TimeseriesSubType.EXPONENTIAL,
+                                           self.short_days)
+        slow = ts.calculate_moving_average(TimeseriesSubType.EXPONENTIAL,
+                                           self.long_days)
+        macd = Timeseries.linearly_combine(fast, 1.0, slow, -1.0)
+        signal = macd.calculate_moving_average(TimeseriesSubType.EXPONENTIAL,
+                                               self.signal_days)
+        macd = macd.create_truncate(len(signal))
+        return (macd, signal)
+
+    def calculate_current_df(self, df, date_col_name = DATE_COL_NAME,
+                             price_col_name = PRICE_COL_NAME):
+        dates = df[date_col_name].tolist()
+        prices = df[price_col_name].tolist()
+
+        ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
+        return self.calculate_current_ts(ts)
+
+    def calculate_timeseries_df(self, df, date_col_name = DATE_COL_NAME,
+                                price_col_name = PRICE_COL_NAME):
+        dates = df[date_col_name].tolist()
+        prices = df[price_col_name].tolist()
+
+        ts = Timeseries(dates, prices, TimeseriesType.PRICE, TimeseriesSubType.ABSOLUTE)
+        return self.calculate_timeseries_ts(ts)
