@@ -17,11 +17,11 @@ class TechnicalIndicator:
         data = parameter_list[0]
         other_args = parameter_list[1:] if len(parameter_list) > 1 else []
 
-        if type(parameter_list[0]) is Timeseries:
+        if isinstance(data, Timeseries):
             return self.calculate_current_ts(data, *other_args)
-        elif type(parameter_list[0]) is pandas.DataFrame:
+        elif isinstance(data, pandas.DataFrame):
             return self.calculate_current_df(data, *other_args)
-        elif type(parameter_list[0]) is dict:
+        elif isinstance(data, dict):
             return self.calculate_current_all(data, *other_args)
         return None
 
@@ -29,11 +29,11 @@ class TechnicalIndicator:
         data = parameter_list[0]
         other_args = parameter_list[1:] if len(parameter_list) > 1 else []
 
-        if type(parameter_list[0]) is Timeseries:
+        if isinstance(data, Timeseries):
             return self.calculate_timeseries_ts(data, *other_args)
-        elif type(parameter_list[0]) is pandas.DataFrame:
+        elif isinstance(data, pandas.DataFrame):
             return self.calculate_timeseries_df(data, *other_args)
-        elif type(parameter_list[0]) is dict:
+        elif isinstance(data, dict):
             return self.calculate_timeseries_all(data, *other_args)
         return None
 
