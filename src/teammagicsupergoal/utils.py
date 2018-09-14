@@ -20,4 +20,10 @@ def list_files(path):
 
 
 def read_csv_to_df(path):
-    return read_csv(path)
+    from pandas.io.common import EmptyDataError
+    try:
+        return read_csv(path)
+    except EmptyDataError:
+        return None
+    except:
+        raise
