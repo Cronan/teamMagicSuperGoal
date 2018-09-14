@@ -45,7 +45,8 @@ def index():
     return render_template('index.html', heading='Home',
                            title='Team Magic Super-Goal',
                            subheading='Super. Magic. A team with a goal.',
-                           menus=menus)
+                           menus=menus,
+                           secs=start_data['work_secs'])
 
 
 
