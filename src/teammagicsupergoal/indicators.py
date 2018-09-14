@@ -52,7 +52,7 @@ class TechnicalIndicator:
     def calculate_current_all(self, df_dictionary, *parameter_list):
         results = {}
         for security in df_dictionary:
-            if df_dictionary[security] != None:
+            if df_dictionary[security] is not None:
                 results[security] = self.calculate_current_df(df_dictionary[security],
                                                               *parameter_list)
             else:
@@ -62,7 +62,7 @@ class TechnicalIndicator:
     def calculate_timeseries_all(self, df_dictionary, *parameter_list):
         results = {}
         for security in df_dictionary:
-            if df_dictionary[security] != None:
+            if df_dictionary[security] is not None:
                 results[security] = self.calculate_timeseries_df(df_dictionary[security],
                                                                  *parameter_list)
             else:

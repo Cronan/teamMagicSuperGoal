@@ -53,6 +53,10 @@ class Timeseries:
         '''
         new_dates = self.dates[0:-period]
         np_new_values = None
+
+        if period >= len(self):
+            return Timeseries([], [], TimeseriesType.RETURNS, returns_type, period)
+
         if returns_type == TimeseriesSubType.FRACTIONAL:
             np_new_values = self.__np_values[period:] / self.__np_values[0:-period]
         elif returns_type == TimeseriesSubType.ABSOLUTE:
@@ -71,6 +75,9 @@ class Timeseries:
         returns_type : Fractional/Logarithmic/Absolute
         period : number of days to calculate the return over
         '''
+        if period >= len(self):
+            return np.NaN
+
         if returns_type == TimeseriesSubType.FRACTIONAL:
             return self.__np_values[-1] / self.__np_values[-period-1]
         elif returns_type == TimeseriesSubType.ABSOLUTE:
@@ -86,6 +93,9 @@ class Timeseries:
         period : period for moving average calculation
         '''
         moving_average = None
+
+        if period > len(self):
+            return Timeseries([],[], TimeseriesType.MOVING_AVERAGE, weighting_type, period)
         
         if weighting_type == TimeseriesSubType.EQUAL:
             np_sum = self.__np_values[period - 1:]
@@ -118,8 +128,8 @@ class Timeseries:
             index = len(self) - 1
         if index < 0:
             index = len(self) + index
-        if period > index + 1:
-            period = index + 1
+        if period > len(self):
+            return np.NaN
 
         if weighting_type == TimeseriesSubType.EQUAL:
             return sum(self.__np_values[index - period + 1:index + 1]) / period
@@ -148,6 +158,8 @@ class Timeseries:
             start_idx = period - 1
         if period > start_idx + 1:
             start_idx = period - 1
+        if period > len(self):
+            return Timeseries([], [], TimeseriesType.RETURNS, weighting_type, period)
 
         moving_average = None
 
@@ -180,6 +192,9 @@ class Timeseries:
         '''
         if moving_average is None:
             moving_average = self.calculate_moving_average(weighting_type, period)
+
+        if period > len(self):
+            return Timeseries([], [], TimeseriesType.VOL, weighting_type, period)
 
         vals_sq = self.__np_values * self.__np_values
 
