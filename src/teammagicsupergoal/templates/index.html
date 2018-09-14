@@ -65,6 +65,9 @@
     <!-- Main Content -->
     <div class="container">
         <div class="row">
+            {% for kv in secs|dictsort %}
+            | {{kv[0]}} |
+            {% endfor %}
         </div>
     </div>
 
