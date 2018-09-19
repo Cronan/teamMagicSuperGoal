@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name='teammagicsupergoal',
-    packages=['teammagicsupergoal'],
+    name='pymdicator',
+    packages=['pymdicator'],
     include_package_data=True,
     install_requires=[
         'flask',

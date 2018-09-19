@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from teammagicsupergoal import utils, indicators
+from pymdicator import utils, indicators
 import random
 import os
 

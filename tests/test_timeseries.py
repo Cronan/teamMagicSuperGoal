@@ -1,8 +1,8 @@
-import teammagicsupergoal.timeseries as ts
+import pymdicator.timeseries as ts
 import datetime
 import numpy as np
 import pytest
-from teammagicsupergoal.utils import read_csv_to_df, PATHS, STOCKS
+from pymdicator.utils import read_csv_to_df, PATHS, STOCKS
 import os
 
 @pytest.fixture(params=[False, pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="reason")(True)])
