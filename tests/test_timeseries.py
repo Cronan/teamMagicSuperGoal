@@ -2,13 +2,14 @@ import pymdicator.timeseries as ts
 import datetime
 import numpy as np
 import pytest
-from pymdicator.utils import read_csv_to_df, PATHS, STOCKS
 import os
+from pandas import read_csv
 
-@pytest.fixture(params=[False, pytest.mark.skipif('TEAM_MAGIC_SKIP_DATA' in os.environ, reason="reason")(True)])
-def test_data(request):
+
+@pytest.fixture(params=[False, True])
+def test_data(request, datadir):
     if request.param:
-        pd = read_csv_to_df(os.path.join(PATHS[STOCKS], 'a.us.txt'))
+        pd = read_csv(datadir.join('stock_data.txt'))
         dts = pd['Date'].tolist()
         vals = pd["Close"].tolist()
     else:
