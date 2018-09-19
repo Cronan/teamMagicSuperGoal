@@ -1,5 +1,5 @@
-from teammagicsupergoal.utils import PATHS, STOCKS, ETFS
-from teammagicsupergoal.utils import list_files, read_csv_to_df
+from pymdicator.utils import PATHS, STOCKS, ETFS
+from pymdicator.utils import list_files, read_csv_to_df
 import os
 import time
 import pytest

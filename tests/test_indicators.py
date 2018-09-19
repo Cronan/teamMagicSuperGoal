@@ -1,9 +1,9 @@
-import teammagicsupergoal.timeseries as ts
-from teammagicsupergoal.indicators import Momentum, MACD, RSI
+import pymdicator.timeseries as ts
+from pymdicator.indicators import Momentum, MACD, RSI
 import numpy as np
 import datetime
 import pytest
-from teammagicsupergoal.utils import read_csv_to_df, PATHS, STOCKS
+from pymdicator.utils import read_csv_to_df, PATHS, STOCKS
 import os
 
 

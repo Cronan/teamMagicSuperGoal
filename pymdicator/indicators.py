@@ -1,4 +1,4 @@
-from teammagicsupergoal.timeseries import Timeseries, TimeseriesType, TimeseriesSubType
+from pymdicator.timeseries import Timeseries, TimeseriesType, TimeseriesSubType
 import numpy as np
 import pandas
 
