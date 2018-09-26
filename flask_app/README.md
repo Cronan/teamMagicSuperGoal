@@ -5,4 +5,6 @@ The files should be named for the stocks they represent, e.g. MSFT.
 
 Then run the following:
 
-```python flask/app.py```
+```easy_install flask```
+
+```python flask_app/app.py```
