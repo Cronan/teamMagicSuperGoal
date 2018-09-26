@@ -1,13 +1,17 @@
 from flask import Flask, render_template, request
-from pymdicator import utils, indicators
+from pymdicator import indicators
 import random
 import os
+from pandas import read_csv
+from numpy import isnan
+
 
 SAMPLE_SIZE = 100
 
 
 def __get_start_data():
-    all_secs = utils.list_files(utils.PATHS[utils.STOCKS])
+    data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/')
+    all_secs = os.listdir(data_dir)
     work_secs = random.sample(all_secs, SAMPLE_SIZE)
     secs = random.sample(all_secs, 10)
     return {
@@ -15,9 +19,9 @@ def __get_start_data():
         'work_secs': dict(
             zip(
                 work_secs, 
-                [utils.read_csv_to_df(
+                [read_csv(
                     os.path.join(
-                        utils.PATHS[utils.STOCKS], s)) for s in work_secs]))
+                        data_dir, s)) for s in work_secs]))
     }
 
 start_data = __get_start_data()
@@ -65,12 +69,13 @@ def momentum():
     indicator = request.form.get("indicator", "")
 
     mom = INDICATOR_RUNNER[indicator](start_data['work_secs'])
+    clean_mom = dict((k, v) for k, v in mom.iteritems() if not isnan(v))
 
     return render_template('results.html', heading='Results',
                            title='Team Magic Super-Goal - Results',
                            subheading='Results from {indicator} indicator.'.format(indicator=indicator),
                            menus=menus,
-                           indicator_results=mom,
+                           indicator_results=clean_mom,
                            momentum_days=MOMENTUM_DAYS)
 
 
